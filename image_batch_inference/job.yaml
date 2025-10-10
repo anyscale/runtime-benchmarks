@@ -1,0 +1,222 @@
+apiVersion: ray.io/v1
+kind: RayJob
+metadata:
+  name: batch-inference
+
+spec:
+  entrypoint: python /home/ray/scripts/batch_inference.py --inference-concurrency 40 40
+
+  shutdownAfterJobFinishes: false
+  rayClusterSpec:
+    rayVersion: '2.50.0'
+    headGroupSpec:
+
+      rayStartParams:
+        dashboard-host: '0.0.0.0'
+        num-cpus: '0'
+
+      template:
+        spec:
+          nodeSelector:
+            gcp-node-type: "n2-standard-16"
+
+          containers:
+          - name: ray-head
+            image: ...
+            env:
+            - name: RAY_GRAFANA_IFRAME_HOST
+              value: http://127.0.0.1:3016
+            - name: RAY_GRAFANA_HOST
+              value: http://prometheus-grafana.prometheus-system.svc:80
+            - name: RAY_PROMETHEUS_HOST
+              value: http://prometheus-kube-prometheus-prometheus.prometheus-system.svc:9090
+
+            resources:
+              limits:
+                cpu: 7
+                memory: 28G
+              requests:
+                cpu: 7
+                memory: 28G
+
+            volumeMounts:
+            - mountPath: /home/ray/scripts
+              name: scripts
+
+            ports:
+            - containerPort: 6379
+              name: gcs-server
+            - containerPort: 8265 # Ray dashboard
+              name: dashboard
+            - containerPort: 10001
+              name: client
+            - containerPort: 44217
+              name: as-metrics # autoscaler
+            - containerPort: 44227
+              name: dash-metrics # dashboard
+
+          volumes:
+          - name: scripts
+            configMap:
+              name: batch-inference-script
+              items:
+              - key: batch_inference.py
+                path: batch_inference.py
+
+    workerGroupSpecs:
+    - replicas: 40
+      groupName: "g2-standard-16"
+
+      rayStartParams:
+        num-gpus: "1"
+
+      template:
+        spec:
+          nodeSelector:
+            gcp-node-type: "g2-standard-16"
+          containers:
+          - name: ray-worker
+            image: ...
+
+            resources:
+              limits:
+                cpu: 15
+                nvidia.com/gpu: "1"
+                memory: 60G
+              requests:
+                cpu: 15
+                nvidia.com/gpu: "1"
+                memory: 60G
+                
+    - replicas: 100
+      groupName: "n2-standard-16"
+      rayStartParams: {}
+      template:
+        spec:
+          nodeSelector:
+            gcp-node-type: "n2-standard-16"
+          containers:
+          - name: ray-worker
+            image: ...
+
+            resources:
+              limits:
+                cpu: 15
+                memory: 59G
+              requests:
+                cpu: 15
+                memory: 59G
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: batch-inference-script
+data:
+  batch_inference.py: | 
+    import argparse
+    import uuid
+    from io import BytesIO
+    from typing import Dict, List, Any
+
+    import numpy as np
+    import ray
+    import torch
+    from transformers import ViTImageProcessor, ViTForImageClassification
+    from PIL import Image
+    from pybase64 import b64decode
+
+    INPUT_PREFIX = "gs://ray-benchmark-data/10TiB-jsonl-images/"
+    OUTPUT_PREFIX = ...
+    
+    BATCH_SIZE = 1024
+
+    PROCESSOR = ViTImageProcessor(
+        do_convert_rgb=None,
+        do_normalize=True,
+        do_rescale=True,
+        do_resize=True,
+        image_mean=[0.5, 0.5, 0.5],
+        image_std=[0.5, 0.5, 0.5],
+        resample=2,
+        rescale_factor=0.00392156862745098,
+        size={"height": 224, "width": 224},
+    )
+
+
+    def parse_args():
+        parser = argparse.ArgumentParser()
+        parser.add_argument(
+            "--inference-concurrency",
+            nargs=2,
+            type=int,
+            required=True,
+            help="The minimum and maximum concurrency for the inference operator.",
+        )
+        return parser.parse_args()
+
+
+    def main(args: argparse.Namespace):
+        (
+            ray.data.read_json(INPUT_PREFIX, lines=True)
+            .flat_map(decode)
+            .map(preprocess)
+            .map_batches(
+                Infer,
+                batch_size=BATCH_SIZE,
+                num_gpus=1,
+                concurrency=tuple(args.inference_concurrency),
+            )
+            .write_parquet(OUTPUT_PREFIX)
+        )
+  
+
+    def decode(row: Dict[str, Any]) -> List[Dict[str, Any]]:
+        image_data = b64decode(row["image"], None, True)
+        image = Image.open(BytesIO(image_data))
+        width, height = image.size
+        return [
+            {
+                "original_url": row["url"],
+                "original_width": width,
+                "original_height": height,
+                "image": np.asarray(image),
+            }
+        ]
+
+
+    def preprocess(row: Dict[str, Any]) -> Dict[str, Any]:
+        outputs = PROCESSOR(images=row["image"])["pixel_values"]
+        assert len(outputs) == 1, len(outputs)
+        row["image"] = outputs[0]
+        return row
+
+
+    class Infer:
+        def __init__(self):
+            self._device = "cuda" if torch.cuda.is_available() else "cpu"
+            self._model = ViTForImageClassification.from_pretrained(
+                "google/vit-base-patch16-224"
+            ).to(self._device, dtype=torch.float16 if self._device == "cuda" else torch.float32)
+            self._model.eval()
+
+        def __call__(self, batch: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
+            with torch.inference_mode():
+                next_tensor = torch.from_numpy(batch["image"]).to(
+                    dtype=torch.float16 if self._device == "cuda" else torch.float32,
+                    device=self._device,
+                    non_blocking=True
+                )
+                output = self._model(next_tensor).logits
+                return {
+                    "original_url": batch["original_url"],
+                    "original_width": batch["original_width"],
+                    "original_height": batch["original_height"],
+                    "output": output.float().cpu().numpy(),  # convert back to float32 for numpy
+                }
+
+    if __name__ == "__main__":
+        ray.init()
+        args = parse_args()
+        main(args)
