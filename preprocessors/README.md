@@ -11,6 +11,17 @@ Cluster configuration used for this benchmark:
 
 ---
 
+### 📦 Dataset Characteristics (High-Cardinality `CUSTKEY` Column)
+
+| Size   | Rows  | Unique `CUSTKEY` Values |
+|--------|-------|-------------------------|
+| 1 GB   | 1.5M  | 99,996                  |
+| 10 GB  | 15M   | 999,962                 |
+| 100 GB | 150M  | 9,999,832               |
+| 1 TB   | 1.5B  | 99,999,998              |
+
+---
+
 ### ⚙️ Execution Notes
 
 - **Script invocation**:
