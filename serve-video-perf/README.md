@@ -11,8 +11,8 @@ The benchmark implements a **4-stage video processing pipeline** with specialize
 ### Pipeline Components
 
 1. **`VideoProcessingAPI`** - FastAPI ingress that receives video processing requests
-2. **`VideoProcessingService`** - Orchestrates the entire video inference workflow
-3. **`VideoDecoder`** - Handles video chunking and frame extraction using FFmpeg
+2. **`VideoProcessingService`** - Handles video chunking and orchestrates the entire video inference workflow
+3. **`VideoDecoder`** - Handles frame extraction using FFmpeg
 4. **`ModelInference`** - Runs object detection inference on extracted frames
 
 ### Processing Flow
