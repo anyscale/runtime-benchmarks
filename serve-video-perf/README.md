@@ -40,9 +40,8 @@ Two inference scenarios are implemented: **chunked inference** (processing each 
 
 ### Installation
 
-The Docker Image is provided - 
+The Dockerfile is provided - 
 ```bash
-# Build Docker image (optional)
 docker build -t video-inference-benchmark .
 ```
 
