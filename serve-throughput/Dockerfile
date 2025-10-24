@@ -1,3 +1,4 @@
 FROM anyscale/ray:2.50.1-slim-py312-cu128
 ENV ANYSCALE_RAY_SERVE_ENABLE_HA_PROXY=1
 ENV RAY_SERVE_THROUGHPUT_OPTIMIZED=1
+RUN pip install --no-cache-dir --upgrade torch numpy httpx tqdm
