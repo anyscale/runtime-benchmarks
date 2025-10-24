@@ -59,11 +59,10 @@ docker build -t video-inference-benchmark .
 
 ## 📊 Performance Results
 
-
 | Scenario | Average latency - Ray Turbo | Average latency - OSS Ray | Improvement |
 |----------|-----------|---------|-------------|
-| **Chunked Inference** | 66s | 110s | **40% faster** |
-| **Combined Inference** | 68s | 112s |  **40% faster** |
+| **Chunked Inference** | 66s | 90s | **27% faster** |
+| **Combined Inference** | 68s | 92s |  **27% faster** |
 
 
 
