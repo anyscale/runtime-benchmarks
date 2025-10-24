@@ -165,8 +165,6 @@ if __name__ == "__main__":
         ("U9mJuUkhUzk", "Medium long video (1 hours) with 300s chunks - Request 10", 300),
         ("U9mJuUkhUzk", "Medium long video (1 hours) with 300s chunks - Request 11", 300),
         ("U9mJuUkhUzk", "Medium long video (1 hours) with 300s chunks - Request 12", 300),
-        ("U9mJuUkhUzk", "Medium long video (1 hours) with 300s chunks - Request 13", 300),
-        ("U9mJuUkhUzk", "Medium long video (1 hours) with 300s chunks - Request 14", 300),
     ]
     
     # Test both inference modes with a smaller set for comparison

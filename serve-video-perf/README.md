@@ -64,8 +64,8 @@ docker build -t video-inference-benchmark .
 
 | Scenario | Ray Turbo | OSS Ray | Improvement |
 |----------|-----------|---------|-------------|
-| **Combined Inference** |  |  | **42% faster** |
-| **Chunked Inference** |  |  |  |
+| **Chunked Inference** | 66s | 110s | **40% faster** |
+| **Combined Inference** | 68s | 112s |  **40% faster** |
 
 
 
