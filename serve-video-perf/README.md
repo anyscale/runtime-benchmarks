@@ -40,7 +40,10 @@ Two inference scenarios are implemented: **chunked inference** (processing each 
 
 ### Installation
 
-The Dockerfile is provided - 
+The Dockerfile is provided - Deploy without these 2 environment variables for the baseline:
+ENV RAY_experimental_object_manager_enable_multiple_connections=1 
+ENV RAY_object_manager_client_connection_num=15
+
 ```bash
 docker build -t video-inference-benchmark .
 ```
@@ -61,8 +64,8 @@ docker build -t video-inference-benchmark .
 
 | Scenario | Average latency - Ray Turbo | Average latency - OSS Ray | Improvement |
 |----------|-----------|---------|-------------|
-| **Chunked Inference** | 66s | 90s | **27% faster** |
-| **Combined Inference** | 68s | 92s |  **27% faster** |
+| **Chunked Inference** | 66s | 90s | **26% faster** |
+| **Combined Inference** | 68s | 94s |  **27% faster** |
 
 
 
