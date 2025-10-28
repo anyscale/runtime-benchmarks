@@ -69,7 +69,8 @@ class ModelInference:
 
 @serve.deployment(
     num_replicas=4,
-    ray_actor_options={"num_cpus": 16, "resources": {"chunk_only": 0.01}},  # Force it to be on a separate node
+    max_replicas_per_node=2,
+    ray_actor_options={"num_cpus": 16, "resources": {"chunk_only": 0.01}},  # Force it to be on a separate node and only 2 replicas on one node
     max_ongoing_requests=1
 )
 class VideoProcessingService:    
