@@ -8,7 +8,6 @@ import time
 
 import ray
 
-# TODO: We should make these public again.
 from ray.data.aggregate import Count, Mean, Sum
 
 
