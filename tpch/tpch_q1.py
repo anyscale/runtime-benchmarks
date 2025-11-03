@@ -100,7 +100,7 @@ def q1_fixed(path):
 def main(args):
     core_warmup()
 
-    path = f"s3://ray-benchmark-data/tpch/parquet/sf{args.sf}/lineitem"
+    path = f"gs://ray-benchmark-data/tpch/parquet/sf{args.sf}/lineitem"
 
     start = time.perf_counter()
 
