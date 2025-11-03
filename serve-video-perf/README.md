@@ -2,7 +2,7 @@
 
 ## 📋 Overview
 
-This benchmark evaluates the performance of **Ray Turbo** vs **Open Source Ray (OSS)** for real-time video processing and object detection workloads. The benchmark demonstrates significant performance improvements in video inference pipelines using improved object transfer bandwidth on Ray Turbo.
+This benchmark evaluates the performance of **Anyscale Runtime** vs **Open Source Ray (OSS)** for real-time video processing and object detection workloads. The benchmark demonstrates significant performance improvements in video inference pipelines using improved object transfer bandwidth on Anyscale Runtime.
 
 ## 🏗️ Architecture
 
@@ -62,7 +62,7 @@ docker build -t video-inference-benchmark .
 
 ## 📊 Performance Results
 
-| Scenario | Average latency - Ray Turbo | Average latency - OSS Ray | Improvement |
+| Scenario | Average latency - Anyscale Runtime | Average latency - OSS Ray | Improvement |
 |----------|-----------|---------|-------------|
 | **Chunked Inference** | 66s | 90s | **26% faster** |
 | **Combined Inference** | 68s | 94s |  **27% faster** |
