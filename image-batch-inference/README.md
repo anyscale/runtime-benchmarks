@@ -1,4 +1,4 @@
-## 🔁 OSS vs Turbo: Image Inference benchmark
+## 🔁 OSS vs Anyscale Runtime: Image Inference benchmark
 
 ### 📦 Dataset Details
 
@@ -10,11 +10,11 @@ This benchmark is run on 10TB of images in JSONL format.
 - **Worker Group 1: 40 g2-standard-16 nodes**
 - **Worker Group 2: 101 n2-standard-16 nodes**
 
-### 📊 Benchmark Results: Turbo vs OSS 
+### 📊 Benchmark Results: Anyscale Runtime vs OSS 
 
 To reproduce the numbers you can run `python batch_inference.py`.
 
-| Ray Turbo (s) | Ray OSS (s) | 
+| Anyscale Runtime (s) | Ray OSS (s) | 
 |--------|--------------------|
 | 431  | 772              |
 
