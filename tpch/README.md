@@ -2,7 +2,7 @@
 
 ### 📦 Dataset Details
 
-These tests were run on TPCH lineitem dataset.
+These tests were run on TPCH lineitem dataset on Ray 2.51.0 version.
 
 ### GKE Cluster Specs
 
@@ -15,5 +15,5 @@ To reproduce the numbers you can run `python tpch_q1.py --sf 1000`  (1000 for 1T
 
 | Size   | Ray Turbo (s) | Ray OSS (s) | 
 |--------|--------|--------------------|
-| 100 GB  | 61.80  | 141.68              |
-| 1 TB  | 398.883  | 1001.37             |
+| 100 GB  | 21.8  | 107.64              |
+| 1 TB  | 99.1  | 913.15             |
